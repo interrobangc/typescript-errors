@@ -28,7 +28,7 @@ const getErrorMessage =
     return code as unknown as string;
   };
 
-export type TSErrorType = TSError<TSErrorDefinition>;
+export type TSErrorType<TErrors extends TSErrorDefinition> = TSError<TErrors>;
 
 /**
  * A custom error class for the Time by Projects project.

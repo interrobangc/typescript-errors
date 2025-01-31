@@ -2,6 +2,7 @@ import { TSErrorDefinition } from './types.js';
 import * as errors from './errors.js';
 
 export type * from './types.js';
+export type * from './errors.js';
 
 export const init = <TErrors extends TSErrorDefinition>(errorMap: TErrors) => {
   return {
