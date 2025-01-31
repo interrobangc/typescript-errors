@@ -114,7 +114,7 @@ export const mayFail =
  */
 export const promiseMayFail =
   <TErrors extends TSErrorDefinition>(errorMap: TErrors) =>
-  async <TCode extends keyof TErrors>(
+  async <T, TCode extends keyof TErrors>(
     target: Promise<unknown>,
     code: TCode,
     meta: Record<string, unknown> = {},
@@ -138,8 +138,8 @@ export const promiseMayFail =
  */
 export const promiseMapMayFail =
   <TErrors extends TSErrorDefinition>(errorMap: TErrors) =>
-  async <TCode extends keyof TErrors>(
-    map: Promise<unknown>[],
+  async <T, TCode extends keyof TErrors>(
+    map: Promise<T>[],
     code: TCode,
     meta: Record<string, unknown> = {},
   ) => {
