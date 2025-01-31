@@ -77,6 +77,7 @@ describe('init', () => {
       [1, 2, 3].map((n) => (n === 2 ? Promise.reject(n) : Promise.resolve(n))),
       'test:error',
     );
+
     expect(isError(result, 'test:error')).toBe(true);
   });
 

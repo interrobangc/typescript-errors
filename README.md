@@ -1,6 +1,6 @@
 # ts-errors
 
-Npm package for creating and handling type safe errors in TypeScript.
+TypeScript library for creating and handling type safe errors without the use of throw statements.
 
 ## Why
 
@@ -8,7 +8,7 @@ There are quite a few other packages out there that do this, but this one is des
 
 Throwing errors in TypeScript makes it impossible for typescript to infer that a function may throw. This package aims to solve that problem while making it easier to split control flow based on the type of error that bubbles up from underlying code.
 
-## Usage
+## Basic Usage
 
 ### Initialize the package
 
@@ -31,15 +31,27 @@ export { isError, mayFail, newError, promiseMayFail, promiseMapMayFail };
 ### Run something that may fail
 
 ```ts
-const result = mayFail(() => JSON.parse('{'), 'test:error');
+const result = mayFail(() => {
+  const data = JSON.parse(someJson);
+  return {
+    id: data.id,
+    name: data.name,
+  };
+}, 'test:error');
 
 if (isError(result, 'test:error')) {
-  // Handle the error if it is a specific error
+  // Handle a specific error differently than other errors
   console.error(result.message);
+  return result; // bubble up the error
 } else if (isError(result)) {
   // Handle any other error
   console.error(result.message);
+  return result; // bubble up the error
 }
+
+// Typescript will correctly infer the result type and throw an error if you try
+// to access properties without checking the error type first
+console.log(result);
 ```
 
 ### Run something async that may fail
@@ -51,19 +63,42 @@ const result = await promiseMayFail(
 );
 
 if (isError(result, 'test:error')) {
+  // Handle a specific error differently than other errors
   console.error(result.message);
+  return result; // bubble up the error
+} else if (isError(result)) {
+  // Handle any other error
+  console.error(result.message);
+  return result; // bubble up the error
 }
+
+// Typescript will correctly infer the result type and throw an error if you try
+// to access properties without checking the error type first
+console.log(result);
 ```
 
 ### Run something async that may fail and return a promise
 
 ```ts
+const ids = [1, 2, 3];
 const result = await promiseMapMayFail(
-  [1, 2, 3].map((n) => fetch(`https://api.example.com/${n}`)),
+  ids.map((n) => fetch(`https://api.example.com/${n}`)),
   'test:error',
 );
 
 if (isError(result, 'test:error')) {
+  // Handle a specific error differently than other errors
   console.error(result.message);
+  return result; // bubble up the error
+} else if (isError(result)) {
+  // Handle any other error
+  console.error(result.message);
+  console.dir(result.meta.error, { depth: null }); // Can access error information for items that errored
+  console.dir(result.meta.results, { depth: null }); // Can access results for items that succeeded
+  return result; // bubble up the error
 }
+
+// Typescript will correctly infer the result type and throw an error if you try
+// to access properties without checking the error type first
+console.log(result);
 ```

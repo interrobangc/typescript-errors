@@ -8,69 +8,18 @@ import { includeIgnoreFile } from '@eslint/compat';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import eslintConfigPrettier from 'eslint-config-prettier';
+import eslint from '@eslint/js';
+import tseslint from 'typescript-eslint';
+import sonarjs from 'eslint-plugin-sonarjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const gitignorePath = path.resolve(__dirname, '.gitignore');
 
-export default [
+export default tseslint.config(
   includeIgnoreFile(gitignorePath),
   eslintConfigPrettier,
-  {
-    parserOptions: {
-      ecmaVersion: 'latest',
-      sourceType: 'module',
-      ecmaFeatures: {
-        jsx: true,
-      },
-    },
-    env: {
-      browser: true,
-      commonjs: true,
-      es6: true,
-    },
-
-    // Base config
-    extends: ['eslint:recommended'],
-
-    overrides: [
-      // Typescript
-      {
-        files: ['**/*.{ts}'],
-        plugins: ['@typescript-eslint', 'import', 'sonarjs'],
-        parser: '@typescript-eslint/parser',
-        settings: {
-          'import/internal-regex': '^~/',
-          'import/resolver': {
-            node: {
-              extensions: ['.ts', '.tsx'],
-            },
-            typescript: {
-              alwaysTryTypes: true,
-            },
-          },
-        },
-        extends: [
-          // 'plugin:sonarjs/recommended',
-          'prettier',
-          'plugin:@typescript-eslint/recommended',
-          'plugin:import/recommended',
-          'plugin:import/typescript',
-        ],
-        rules: {
-          'no-console': 'error',
-          'import/no-named-as-default': 'off',
-          'no-prototype-builtins': 'off',
-        },
-      },
-
-      // Node
-      {
-        files: ['.eslintrc.cjs'],
-        env: {
-          node: true,
-        },
-      },
-    ],
-  },
-];
+  eslint.configs.recommended,
+  tseslint.configs.recommended,
+  sonarjs.configs.recommended,
+);

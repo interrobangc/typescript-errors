@@ -69,12 +69,13 @@ export class TSError<TErrors extends TSErrorDefinition> extends Error {
  * @returns {bool} Whether the target is a RemixError
  */
 export const isError =
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   <TErrors extends TSErrorDefinition>(errorMap: TErrors) =>
-  <TCode extends keyof TErrors>(
-    target: unknown,
-    code?: TCode,
-  ): target is TSError<TErrors> =>
-    target instanceof TSError && (!code || target.code === code);
+    <TCode extends keyof TErrors>(
+      target: unknown,
+      code?: TCode,
+    ): target is TSError<TErrors> =>
+      target instanceof TSError && (!code || target.code === code);
 
 /**
  * Resolves a target that could throw and returns a RemixError if the target fails
