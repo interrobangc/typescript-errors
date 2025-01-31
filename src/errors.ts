@@ -88,8 +88,8 @@ export const isError =
  */
 export const mayFail =
   <TErrors extends TSErrorDefinition>(errorMap: TErrors) =>
-  <TCode extends keyof TErrors>(
-    target: () => unknown,
+  <T, TCode extends keyof TErrors>(
+    target: () => T,
     code: TCode,
     meta: Record<string, unknown> = {},
   ) => {

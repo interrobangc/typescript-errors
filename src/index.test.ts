@@ -25,8 +25,17 @@ describe('init', () => {
   });
 
   it('mayFail should return the result of the function if it does not throw', () => {
-    const result = mayFail(() => 'test', 'test:error');
-    expect(result).toBe('test');
+    const result = mayFail(() => ({ id: 1, name: 'test' }), 'test:error');
+
+    if (isError(result)) {
+      throw new Error('test');
+    }
+
+    expect(result).toEqual({ id: 1, name: 'test' });
+    expect(result.name).toEqual('test');
+    expect(result.id).toEqual(1);
+    // @ts-expect-error - This should now fail typescript compilation
+    expect(result.doesNotExist).toBeUndefined();
   });
 
   it('mayFail should return an error if the function throws', () => {
