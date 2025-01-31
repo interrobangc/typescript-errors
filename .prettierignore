@@ -1,0 +1,10 @@
+# defaults
+**/.git
+**/.svn
+**/.hg
+**/node_modules
+
+**/build
+**/dist
+
+pnpm-lock.yaml
