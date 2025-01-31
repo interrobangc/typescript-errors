@@ -1,14 +1,14 @@
 {
   "name": "typescript-errors",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Minimal type safe error handling for TypeScript",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "publish": "run-s test build publish:run",
-    "publish:run": "pnpm publish --access public",
+    "npmPublish": "run-s test build npmPublish:run",
+    "npmPublish:run": "pnpm publish --access public",
     "test": "run-p lint:fix typecheck test:unit",
     "test:integration": "vitest run --test-timeout=120000 --config ./vitest.integration.ts",
     "test:unit": "vitest run --coverage",
