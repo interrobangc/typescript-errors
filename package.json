@@ -1,5 +1,5 @@
 {
-  "name": "ts-errors",
+  "name": "typescript-errors",
   "version": "0.1.0",
   "description": "Minimal type safe error handling for TypeScript",
   "main": "dist/index.js",
