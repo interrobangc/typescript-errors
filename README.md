@@ -1,4 +1,4 @@
-# ts-errors
+# typescript-errors
 
 TypeScript library for creating and handling type safe errors without the use of throw statements.
 
@@ -13,7 +13,8 @@ Throwing errors in TypeScript makes it impossible for typescript to infer that a
 ### Initialize the package
 
 ```ts
-import { init } from 'ts-errors';
+import type { TSErrorDefinition } from 'typescript-errors';
+import { init } from 'typescript-errors';
 
 const TS_ERRORS = {
   error: {
