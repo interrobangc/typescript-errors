@@ -10,8 +10,14 @@ const TEST_ERRORS = {
 } as const satisfies TSErrorDefinition;
 
 describe('init', () => {
-  const { isError, mayFail, newError, promiseMayFail, promiseMapMayFail } =
-    init(TEST_ERRORS);
+  const {
+    isError,
+    mayFail,
+    newError,
+    promiseMayFail,
+    promiseMapMayFail,
+    throwIfError,
+  } = init(TEST_ERRORS);
   it('newError should be able to create a new error', () => {
     const error = newError({ code: 'test:error' });
     expect(error.message).toEqual('Test error');
@@ -97,5 +103,19 @@ describe('init', () => {
       'unknown:error',
     );
     expect(true).toBe(true);
+  });
+
+  it('throwIfError should throw an error if the promise fails', async () => {
+    const fn = () =>
+      throwIfError(
+        promiseMayFail(Promise.reject(new Error('test')), 'test:error'),
+      );
+    expect(fn).rejects.toThrowError('Test error');
+  });
+
+  it('throwIfError should not throw an error if the promise succeeds', async () => {
+    const fn = () =>
+      throwIfError(promiseMayFail(Promise.resolve('test'), 'test:error'));
+    expect(fn).not.toThrow();
   });
 });

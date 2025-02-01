@@ -162,6 +162,14 @@ export const promiseMapMayFail =
     );
   };
 
+export const throwIfError =
+  <TErrors extends TSErrorDefinition>(errorMap: TErrors) =>
+  async <T>(target: Promise<T>, code?: keyof TErrors) => {
+    const res = await target;
+    if (isError(errorMap)(res, code)) throw res;
+    return res as Exclude<Awaited<T>, TSError<TErrors>>;
+  };
+
 export const newError =
   <TErrors extends TSErrorDefinition>(errorMap: TErrors) =>
   (args: Omit<TSErrorParams<TErrors>, 'errorMap'>) => {
