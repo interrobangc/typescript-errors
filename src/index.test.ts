@@ -18,15 +18,26 @@ const TEST_ERRORS = {
   },
 } as const satisfies TSErrorDefinition;
 
+const {
+  isError,
+  mayFail,
+  newError,
+  promiseMayFail,
+  promiseMapMayFail,
+  throwIfError,
+} = init(TEST_ERRORS);
+
 describe('init', () => {
-  const {
-    isError,
-    mayFail,
-    newError,
-    promiseMayFail,
-    promiseMapMayFail,
-    throwIfError,
-  } = init(TEST_ERRORS);
+  it('type should fail if not a TSErrorDefinition', () => {
+    init({
+      // @ts-expect-error - This should now fail typescript compilation
+      'test:error': {},
+    });
+    expect(true).toBe(true);
+  });
+});
+
+describe('newError', () => {
   it('newError should be able to create a new error', () => {
     const error = newError({ code: 'test:error' });
     expect(error.message).toEqual('Test error');
@@ -39,7 +50,9 @@ describe('init', () => {
     newError({ code: 'unknown:error' });
     expect(true).toBe(true);
   });
+});
 
+describe('mayFail', () => {
   it('mayFail should return the result of the function if it does not throw', () => {
     const result = mayFail(() => ({ id: 1, name: 'test' }), 'test:error');
 
@@ -84,7 +97,9 @@ describe('init', () => {
       );
     }
   });
+});
 
+describe('promiseMayFail', () => {
   it('promiseMayFail should return the result of the promise if it does not throw', async () => {
     const result = await promiseMayFail(Promise.resolve('test'), 'test:error');
     expect(result).toBe('test');
@@ -98,7 +113,9 @@ describe('init', () => {
     expect(isError(result, 'test:error')).toBe(true);
     expect(result.statusCode).toEqual(400);
   });
+});
 
+describe('promiseMapMayFail', () => {
   it('promiseMayFail type should fail typescript on unknown code', async () => {
     await promiseMayFail(
       Promise.resolve('test'),
@@ -184,7 +201,9 @@ describe('init', () => {
     await promiseMapMayFail([1, 2, 3], 'test:error');
     expect(true).toBe(true);
   });
+});
 
+describe('throwIfError', () => {
   it('throwIfError should throw an error if the promise fails', async () => {
     const fn = () =>
       throwIfError(

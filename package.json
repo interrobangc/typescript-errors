@@ -1,6 +1,6 @@
 {
   "name": "typescript-errors",
-  "version": "0.9.2",
+  "version": "1.0.0",
   "description": "Minimal type safe error handling for TypeScript",
   "files": [
     "dist"
@@ -30,7 +30,7 @@
     "lint:prettier:fix": "prettier . --write",
     "lint:eslint": "eslint .",
     "lint:eslint:fix": "eslint . --fix",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit --project tsconfig.test.json"
   },
   "keywords": [],
   "author": "bo@interrobang.consulting",

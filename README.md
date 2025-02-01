@@ -52,35 +52,19 @@ import { init } from 'typescript-errors';
 
 // Define your error codes and messages
 const TS_ERRORS = {
-  error: {
+  'test:error': {
     message: 'An error occurred',
     statusCode: 400, // Optional, defaults to 500
   },
 } as const satisfies TSErrorDefinition;
 
-const {
-  isError,
-  mayFail,
-  newError,
-  promiseMayFail,
-  promiseMapMayFail,
-  throwIfError,
-} = init(TS_ERRORS);
-
-export {
-  isError,
-  mayFail,
-  newError,
-  promiseMayFail,
-  promiseMapMayFail,
-  throwIfError,
-};
+const tsErr = init(TS_ERRORS);
 ```
 
 ### Run something that may fail
 
 ```ts
-const result = mayFail(() => {
+const result = tsErr.mayFail(() => {
   const data = JSON.parse(someJson);
   return {
     id: data.id,
@@ -88,11 +72,11 @@ const result = mayFail(() => {
   };
 }, 'test:error');
 
-if (isError(result, 'test:error')) {
+if (tsErr.isError(result, 'test:error')) {
   // Handle a specific error differently than other errors
   console.error(result.message);
   return result; // bubble up the error
-} else if (isError(result)) {
+} else if (tsErr.isError(result)) {
   // Handle any other error
   console.error(result.message);
   return result; // bubble up the error
@@ -106,16 +90,16 @@ console.log(result);
 ### Run something async that may fail
 
 ```ts
-const result = await promiseMayFail(
+const result = await tsErr.promiseMayFail(
   fetch('https://api.example.com'),
   'test:error',
 );
 
-if (isError(result, 'test:error')) {
+if (tsErr.isError(result, 'test:error')) {
   // Handle a specific error differently than other errors
   console.error(result.message);
   return result; // bubble up the error
-} else if (isError(result)) {
+} else if (tsErr.isError(result)) {
   // Handle any other error
   console.error(result.message);
   return result; // bubble up the error
@@ -130,16 +114,16 @@ console.log(result);
 
 ```ts
 const ids = [1, 2, 3];
-const result = await promiseMapMayFail(
+const result = await tsErr.promiseMapMayFail(
   ids.map((n) => fetch(`https://api.example.com/${n}`)),
   'test:error',
 );
 
-if (isError(result, 'test:error')) {
+if (tsErr.isError(result, 'test:error')) {
   // Handle a specific error differently than other errors
   console.error(result.message);
   return result; // bubble up the error
-} else if (isError(result)) {
+} else if (tsErr.isError(result)) {
   // Handle any other error
   console.error(result.message);
   console.dir(result.meta.error, { depth: null }); // Can access error information for items that errored
@@ -155,8 +139,8 @@ console.log(result);
 ### Sometimes you actually WANT to throw (like in a top level remix route)
 
 ```ts
-const result = await throwIfError(
-  promiseMayFail(Promise.reject(new Error('test')), 'test:error'),
+const result = await tsErr.throwIfError(
+  tsErr.promiseMayFail(Promise.reject(new Error('test')), 'test:error'),
 );
 ```
 
@@ -176,17 +160,10 @@ const TS_ERRORS = {
   },
 } as const satisfies TSErrorDefinition;
 
-const {
-  isError,
-  mayFail,
-  newError,
-  promiseMayFail,
-  promiseMapMayFail,
-  throwIfError,
-} = init(TS_ERRORS);
+const tsErr = init(TS_ERRORS);
 
-const result = mayFail(() => {
-  return newError({ code: 'test:error:somethingElse' });
+const result = tsErr.mayFail(() => {
+  return tsErr.newError({ code: 'test:error:somethingElse' });
 }, 'test:error');
 
 console.dir(result, { depth: null }); // { code: 'test:error:somethingElse', message: 'Something else went wrong', statusCode: 403 }
@@ -205,17 +182,10 @@ const TS_ERRORS = {
   },
 } as const satisfies TSErrorDefinition;
 
-const {
-  isError,
-  mayFail,
-  newError,
-  promiseMayFail,
-  promiseMapMayFail,
-  throwIfError,
-} = init(TS_ERRORS);
+const tsErr = init(TS_ERRORS);
 
-const result = mayFail(() => {
-  throw newError({
+const result = tsErr.mayFail(() => {
+  throw tsErr.newError({
     code: 'test:error:functionMessage',
     meta: { customText: 'custom text' },
   });
@@ -239,7 +209,7 @@ It includes the following properties:
 The TSError object is not intended to be used directly. Instead, you should use the `newError` function to create errors if you need to create an error without calling a mayFail function.
 
 ```ts
-const error = newError({
+const error = tsErr.newError({
   code: 'test:error',
   message: 'Test error',
   statusCode: 400,
