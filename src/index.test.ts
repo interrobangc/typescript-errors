@@ -105,6 +105,12 @@ describe('init', () => {
     expect(true).toBe(true);
   });
 
+  it('promiseMapMayFail should fail typescript on bad map type', async () => {
+    // @ts-expect-error - This should now fail typescript compilation
+    await promiseMapMayFail([1, 2, 3], 'test:error');
+    expect(true).toBe(true);
+  });
+
   it('throwIfError should throw an error if the promise fails', async () => {
     const fn = () =>
       throwIfError(
