@@ -87,6 +87,48 @@ describe('init', () => {
     expect(result).toEqual([1, 2, 3]);
   });
 
+  it('promiseMapMayFail should return the results of complex types if they do not throw', async () => {
+    const users = [
+      {
+        id: 1,
+        name: 'test1',
+      },
+      {
+        id: 2,
+        name: 'test2',
+      },
+      {
+        id: 3,
+        name: 'test3',
+      },
+    ];
+    const res = await promiseMapMayFail(
+      users.flatMap(async (user) => {
+        if (user.id > 5) {
+          return newError({ code: 'test:error', message: 'Test error' });
+        }
+
+        return {
+          user,
+        };
+      }),
+      'test:error',
+    );
+
+    if (isError(res)) {
+      throw res;
+    }
+
+    expect(res.filter((r) => !isError(r) && r.user.id === 2)).toEqual([
+      {
+        user: {
+          id: 2,
+          name: 'test2',
+        },
+      },
+    ]);
+  });
+
   it('promiseMapMayFail should return an error if any of the promises fails', async () => {
     const result = await promiseMapMayFail(
       [1, 2, 3].map((n) => (n === 2 ? Promise.reject(n) : Promise.resolve(n))),

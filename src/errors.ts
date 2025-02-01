@@ -138,11 +138,11 @@ export const promiseMayFail =
  */
 export const promiseMapMayFail =
   <TErrors extends TSErrorDefinition>(errorMap: TErrors) =>
-  async <T extends Promise<unknown>[], TCode extends keyof TErrors>(
-    map: T,
+  async <T, TCode extends keyof TErrors>(
+    map: Promise<T>[],
     code: TCode,
     meta: Record<string, unknown> = {},
-  ) => {
+  ): Promise<TSError<TErrors> | T[]> => {
     const resolved = await Promise.allSettled(map);
     const errors = resolved.filter(
       (item) => item.status === 'rejected' || isError(errorMap)(item.value),
@@ -157,9 +157,7 @@ export const promiseMapMayFail =
       });
     }
 
-    return results.map(
-      (item) => (item as PromiseFulfilledResult<unknown>).value,
-    );
+    return results.map((item) => (item as PromiseFulfilledResult<T>).value);
   };
 
 export const throwIfError =
