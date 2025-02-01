@@ -1,4 +1,7 @@
-import type { TSErrorDefinition } from './types.js';
+import type {
+  TSErrorDefinition,
+  TSErrorDefinitionMessageFnArgs,
+} from './types.js';
 
 import { describe, it, expect } from 'vitest';
 import { init } from './index.js';
@@ -6,6 +9,12 @@ import { init } from './index.js';
 const TEST_ERRORS = {
   'test:error': {
     message: 'Test error',
+    statusCode: 400,
+  },
+  'test:error:functionMessage': {
+    message: (args: TSErrorDefinitionMessageFnArgs) =>
+      `Test error from function ${String(args.code)} ${String(args.meta?.customText)}`,
+    statusCode: 400,
   },
 } as const satisfies TSErrorDefinition;
 
@@ -22,6 +31,7 @@ describe('init', () => {
     const error = newError({ code: 'test:error' });
     expect(error.message).toEqual('Test error');
     expect(isError(error, 'test:error')).toBe(true);
+    expect(error.statusCode).toEqual(400);
   });
 
   it('newError should fail typescript on unknown code', () => {
@@ -49,12 +59,30 @@ describe('init', () => {
       throw new Error('test');
     }, 'test:error');
     expect(isError(result, 'test:error')).toBe(true);
+    expect(result.statusCode).toEqual(400);
   });
 
   it('mayFail type should fail typescript on unknown code', () => {
     // @ts-expect-error - This should now fail typescript compilation
     mayFail(() => 'test', 'unknown:error');
     expect(true).toBe(true);
+  });
+
+  it('mayFail should return an error with a custom message', () => {
+    const result = mayFail(
+      () => {
+        throw new Error('test');
+      },
+      'test:error:functionMessage',
+      {
+        customText: 'custom text',
+      },
+    );
+    if (isError(result, 'test:error:functionMessage')) {
+      expect(result.message).toEqual(
+        'Test error from function test:error:functionMessage custom text',
+      );
+    }
   });
 
   it('promiseMayFail should return the result of the promise if it does not throw', async () => {
@@ -68,6 +96,7 @@ describe('init', () => {
       'test:error',
     );
     expect(isError(result, 'test:error')).toBe(true);
+    expect(result.statusCode).toEqual(400);
   });
 
   it('promiseMayFail type should fail typescript on unknown code', async () => {
@@ -136,6 +165,9 @@ describe('init', () => {
     );
 
     expect(isError(result, 'test:error')).toBe(true);
+    if (isError(result, 'test:error')) {
+      expect(result.statusCode).toEqual(400);
+    }
   });
 
   it('promiseMapMayFail type should fail typescript on unknown code', async () => {
@@ -159,6 +191,9 @@ describe('init', () => {
         promiseMayFail(Promise.reject(new Error('test')), 'test:error'),
       );
     expect(fn).rejects.toThrowError('Test error');
+    if (isError(fn)) {
+      expect(fn.statusCode).toEqual(400);
+    }
   });
 
   it('throwIfError should not throw an error if the promise succeeds', async () => {

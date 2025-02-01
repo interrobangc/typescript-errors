@@ -1,13 +1,9 @@
-import type { TSErrorDefinition, TSErrorParams } from './types.js';
+import type {
+  TSErrorDefinition,
+  TSErrorParams,
+  TSErrorDefinitionMessageFnArgs,
+} from './types.js';
 
-/**
- * These functions make up a TS safe error handling system.
- *
- * The types are a bit messy and overly complicated so that this system can be extended
- * and used by other projects that use it (like the Remix frontend).
- *
- * Since the
- */
 const isErrorCode =
   <TErrors extends TSErrorDefinition>(errorMap: TErrors) =>
   <TCode extends keyof TErrors>(code: unknown): code is TCode => {
@@ -16,22 +12,33 @@ const isErrorCode =
 
 const getErrorMessage =
   <TErrors extends TSErrorDefinition>(errorMap: TErrors) =>
-  <TCode extends keyof TErrors>(code: TCode, message?: string): string => {
+  (args: TSErrorDefinitionMessageFnArgs): string => {
+    const { code, message } = args;
     if (message) {
       return message;
     }
 
     if (isErrorCode(errorMap)(code)) {
-      return errorMap[code]?.message ?? code;
+      const messageOrFn = errorMap[code]?.message;
+      if (typeof messageOrFn === 'function') {
+        return messageOrFn(args) ?? code;
+      }
+      return messageOrFn ?? code;
     }
 
     return code as unknown as string;
   };
 
+const getStatusCode =
+  <TErrors extends TSErrorDefinition>(errorMap: TErrors) =>
+  <TCode extends keyof TErrors>(code: TCode, statusCode?: number): number => {
+    return statusCode ?? errorMap[code]?.statusCode ?? 500;
+  };
+
 export type TSErrorType<TErrors extends TSErrorDefinition> = TSError<TErrors>;
 
 /**
- * A custom error class for the Time by Projects project.
+ * A custom error class so that we can add a code, cause, and meta data.
  *
  * We extend the base Error class because folks know how to deal with them and they include a stack trace.
  *
@@ -39,11 +46,14 @@ export type TSErrorType<TErrors extends TSErrorDefinition> = TSError<TErrors>;
  *
  * The code is a string that represents the error. It should be unique and descriptive.
  * The message will be pulled from the TS_ERRORS constant.
+ *
+ * THIS CLASS SHOULD NEVER BE USED DIRECTLY.
  */
 export class TSError<TErrors extends TSErrorDefinition> extends Error {
   message: string;
   code: keyof TErrors;
   cause?: unknown;
+  statusCode?: number;
   meta: Record<string, unknown>;
 
   constructor({
@@ -52,12 +62,19 @@ export class TSError<TErrors extends TSErrorDefinition> extends Error {
     code,
     message,
     meta,
+    statusCode,
   }: TSErrorParams<TErrors>) {
     super();
     this.code = code;
-    this.message = getErrorMessage(errorMap)(code, message);
+    this.message = getErrorMessage(errorMap)({
+      code,
+      message,
+      meta,
+      statusCode,
+    });
     this.cause = cause;
     this.meta = meta ?? {};
+    this.statusCode = getStatusCode(errorMap)(code, statusCode);
   }
 }
 
