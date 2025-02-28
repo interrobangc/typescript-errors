@@ -22,4 +22,8 @@ export default tseslint.config(
   eslint.configs.recommended,
   tseslint.configs.recommended,
   sonarjs.configs.recommended,
+  // ignore this file
+  {
+    files: ['.eslintrc.ts'],
+  },
 );
