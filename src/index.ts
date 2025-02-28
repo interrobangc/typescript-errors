@@ -12,5 +12,7 @@ export const init = <TErrors extends TSErrorDefinition>(errorMap: TErrors) => {
     promiseMapMayFail: errors.promiseMapMayFail<TErrors>(errorMap),
     newError: errors.newError<TErrors>(errorMap),
     throwIfError: errors.throwIfError<TErrors>(errorMap),
+    throwErrorResponseIfError:
+      errors.throwErrorResponseIfError<TErrors>(errorMap),
   };
 };

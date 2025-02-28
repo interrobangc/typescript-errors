@@ -1,6 +1,6 @@
 {
   "name": "typescript-errors",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Minimal type safe error handling for TypeScript",
   "files": [
     "dist"
